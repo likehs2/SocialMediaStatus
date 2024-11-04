@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Twitter Clone</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+
+<body>
+    <nav class="navbar">
+        <ul class="nav-links">
+            <li><a href="#">Página Inicial</a></li>
+            <li><a href="#" id="change-avatar-btn">Alterar Imagem</a></li>
+            <li><a href="#">Notificações</a></li>
+            <li><a href="#">Configurações</a></li>
+            <li><a href="#" id="logout-btn">Sair</a></li>
+        </ul>
+    </nav>
+
+    <div id="avatarModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Alterar Imagem de Perfil</h2>
+            <form id="avatarForm" method="POST" enctype="multipart/form-data">
+                <label for="avatar">Escolha uma imagem:</label>
+                <input type="file" name="avatar" id="avatar" accept="image/*" required>
+                <button type="submit">Enviar</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="card">
+        <h1>Publicações</h1>
+        <form id="post-form" method="POST">
+            <textarea name="content" id="content" placeholder="Escreva algo"></textarea>
+            <button type="submit">Publicar</button>
+        </form>
+    </div>
+
+    <div class="posts-container">
+        <ul>
+            <% posts.forEach(post=> { %>
+                <li class="card-post">
+
+                    <% }) %>
+        </ul>
+    </div>
+
+    <script>
+        // Função para decodificar JWT
+        const parseJwt = token => {
+            try {
+                const base64Url = token.split('.')[1];
+                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                const jsonPayload = decodeURIComponent(atob(base64).split('').map(c =>
+                    '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
+                ).join(''));
+
+                return JSON.parse(jsonPayload);
+            } catch (error) {
+                console.error('Erro ao decodificar o JWT:', error);
+                return null;
+            }
+        };
+
+        // Inicializa a interface
+        document.addEventListener('DOMContentLoaded', () => {
+            const usernameDisplay = document.getElementById('username-display');
+            const avatarDisplay = document.querySelector('.user-info img');
+            const postForm = document.querySelector('#post-form');
+            const avatarForm = document.getElementById('avatarForm');
+            const username = localStorage.getItem('username');
+            const avatar = localStorage.getItem('avatar');
+
+            if (username) {
+                usernameDisplay.textContent = "@" + username;
+            }
+
+            if (avatar) {
+                avatarDisplay.src = avatar;
+            }
+
+            // Evento para enviar novo post
+            postForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const content = document.querySelector('#content');
+                const nomeUsuario = localStorage.getItem('nomeusuario');
+
+                if (!nomeUsuario) {
+                    return window.location.href = `/users/Login`;
+                }
+
+                await fetch('/posts/new', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: new URLSearchParams({ content: content.value, nomeusuario: nomeUsuario })
+                });
+
+                window.location.href = `/home`;
+            });
+
+            // Evento para enviar nova imagem de perfil
+            avatarForm.onsubmit = async (event) => {
+                event.preventDefault();
+                const formData = new FormData(avatarForm);
+                formData.append('nomeusuario', localStorage.getItem('nomeusuario'));
+
+                try {
+                    const response = await fetch('/users/upload-avatar', { method: 'POST', body: formData });
+                    if (response.ok) window.location.href = `/home`;
+                    else alert('Erro ao enviar a imagem.');
+                } catch (error) {
+                    console.error('Erro na requisição:', error);
+                    alert('Ocorreu um erro ao tentar enviar a imagem.');
+                }
+            };
+
+            loadPosts();
+            setupEventListeners();
+        });
+
+        // Função para carregar posts
+        const loadPosts = async () => {
+            const response = await fetch('/posts');
+            if (response.ok) {
+                const posts = await response.json();
+                const postsContainer = document.querySelector('.posts-container ul');
+                postsContainer.innerHTML = ''; // Limpa posts existentes
+                posts.forEach(async post => {
+                    await renderPost(post); // Renderiza o post e valida a curtida
+                });
+            } else {
+                console.error('Erro ao carregar posts:', response.statusText);
+            }
+        };
+
+        // Função para renderizar cada post
+        const renderPost = async post => {
+            const nomeUsuario = localStorage.getItem('nomeusuario');
+            const postItem = document.createElement('li');
+            postItem.classList.add('card-post');
+
+            // Renderiza o post
+            postItem.innerHTML = `
+        <div class="post-header">
+            <img src="${post.profile_picture}" alt="Avatar do Usuário" class="avatar">
+            <span class="username">@${post.username}</span>
+        </div>
+        <p>${post.content}</p>
+        <div class="post-actions">
+            <button class="like-button" data-post-id="${post.id}">
+                <i class="${post.liked ? 'fas' : 'far'} fa-heart"></i>
+                <span class="like-count">${post.like_count || 0}</span>
+            </button>
+            <button class="comment-button" data-post-id="${post.id}">
+                <i class="fas fa-comment"></i>
+            </button>
+        </div>
+        <div class="comment-card" id="comment-card-${post.id}" style="display: none;">
+            <h3>Comentários</h3>
+            <ul id="comments-list-${post.id}">
+                ${post.comments && post.comments.length > 0 ? post.comments.map(comment => `<li><strong>${comment.username}:</strong> ${comment.content}</li>`).join('') : '<li>Sem comentários ainda.</li>'}
+            </ul>
+            <textarea id="comment-input-${post.id}" placeholder="Escreva um comentário..."></textarea>
+            <button class="send-comment" data-post-id="${post.id}">Enviar</button>
+        </div>
+    `;
+
+            // Adiciona o evento ao botão de like
+            const likeButton = postItem.querySelector('.like-button');
+            likeButton.addEventListener('click', () => toggleLike(post.id));
+
+            // Adiciona o evento ao botão de comentar
+            const commentButton = postItem.querySelector('.comment-button');
+            const commentCard = postItem.querySelector(`#comment-card-${post.id}`);
+            commentButton.addEventListener('click', () => {
+                // Exibir/ocultar o card de comentários
+                if (commentCard.style.display === 'none' || !commentCard.style.display) {
+                    commentCard.style.display = 'block'; // Exibir
+                } else {
+                    commentCard.style.display = 'none'; // Ocultar
+                }
+                console.log(`Botão de comentar clicado para o post ID: ${post.id}`); // Debug
+            });
+
+
+            // Adiciona o evento ao botão de enviar comentário
+            const sendCommentButton = postItem.querySelector('.send-comment');
+            sendCommentButton.addEventListener('click', async () => {
+                const commentInput = postItem.querySelector(`#comment-input-${post.id}`);
+                const commentContent = commentInput.value;
+
+                if (!commentContent) {
+                    alert('Por favor, digite um comentário.');
+                    return;
+                }
+
+                // Enviar o comentário para o backend
+                await fetch(`/comments/new`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        content: commentContent,
+                        user_id: localStorage.getItem('userId'),
+                        post_id: post.id
+                    })
+                });
+
+                // Adiciona o novo comentário à lista
+                const commentsList = postItem.querySelector(`#comments-list-${post.id}`);
+                commentsList.innerHTML += `<li><strong>${nomeUsuario}:</strong> ${commentContent}</li>`;
+                commentInput.value = ''; // Limpa o campo de input
+            });
+
+            document.querySelector('.posts-container ul').appendChild(postItem);
+
+            // Verifica se o usuário já curtiu este post
+            const likeResponse = await fetch(`/posts/liked/${post.id}/${nomeUsuario}`);
+            if (likeResponse.ok) {
+                const { liked } = await likeResponse.json();
+                if (liked) {
+                    likeButton.querySelector('i').classList.remove('far');
+                    likeButton.querySelector('i').classList.add('fas');
+                }
+            }
+        };
+
+
+
+        async function toggleLike(postId) {
+            const nomeUsuario = localStorage.getItem('nomeusuario');
+            const likeButton = document.querySelector(`[data-post-id="${postId}"] i`);
+            const likeCountElement = document.querySelector(`[data-post-id="${postId}"] .like-count`);
+            let currentLikeCount = parseInt(likeCountElement.textContent, 10);
+
+            if (likeButton.classList.contains('fas')) {
+                // Se já está curtido, remover a curtida
+                const response = await fetch(`/posts/unlike/${postId}/${nomeUsuario}`, { method: 'DELETE' });
+                if (response.ok) {
+                    likeButton.classList.remove('fas'); // Remove o coração preenchido
+                    likeButton.classList.add('far'); // Adiciona o coração vazio
+                    likeCountElement.textContent = currentLikeCount - 1; // Decrementa o contador de curtidas
+                } else {
+                    console.error('Erro ao descurtir o post');
+                }
+            } else {
+                // Se não está curtido, curtir o post
+                const response = await fetch(`/posts/like/${postId}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nomeusuario: nomeUsuario, postId: postId })
+                });
+
+                if (response.ok) {
+                    likeButton.classList.remove('far'); // Remove o coração vazio
+                    likeButton.classList.add('fas'); // Adiciona o coração preenchido
+                    likeCountElement.textContent = currentLikeCount + 1; // Incrementa o contador de curtidas
+                } else {
+                    console.error('Erro ao curtir o post');
+                }
+            }
+        }
+
+
+
+        // Configura ouvintes de eventos
+        const setupEventListeners = () => {
+
+            document.getElementById('logout-btn').addEventListener('click', () => {
+                localStorage.removeItem('nomeusuario');
+                localStorage.removeItem('avatar');
+                window.location.href = '/users/Login';
+            });
+
+            document.getElementById('change-avatar-btn').onclick = () => {
+                document.getElementById('avatarModal').style.display = 'block';
+            };
+
+            document.querySelector('.close').onclick = () => {
+                document.getElementById('avatarModal').style.display = 'none';
+            };
+        };
+    </script>
+
+</body>
+
+</html>

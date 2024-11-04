@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" type="text/css" href="/css/style-login.css">
+    <title>Login</title>
+</head>
+
+<body>
+    <h1>Login</h1>
+    <form id="login-form" method="POST">
+        <input type="text" name="username" id="username" placeholder="Username" required>
+        <input type="password" name="password" id="password" placeholder="Password" required>
+        <button type="submit">Login</button>
+    </form>
+
+    <div style="margin-top: 20px; text-align: center; display: flex;">
+        <p>Ainda não tem uma conta? <a href="/users/register" style="color: #1da1f2; text-decoration: none;">Registrar</a></p>
+    </div>
+
+    <!-- Este elemento será atualizado com o nome de usuário após o login -->
+    <div class="username" style="display: none;">Nome de Usuário</div>
+
+    <!-- Botão de Logout (inicialmente oculto) -->
+    <button id="logout-button" style="display: none;">Sair</button>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+        const loginForm = document.querySelector('#login-form');
+        const usernameDisplay = document.querySelector('.username');
+        const logoutButton = document.getElementById('logout-button');
+
+        
+        function parseJwt(token) {
+            try {
+                const base64Url = token.split('.')[1];
+                const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+                const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+                    return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+                }).join(''));
+                return JSON.parse(jsonPayload);
+            } catch (error) {
+                return null;
+            }
+        }
+
+        
+        const storedToken = localStorage.getItem('jwtToken');
+        if (storedToken) {
+            const decodedToken = parseJwt(storedToken); 
+            if (decodedToken && decodedToken.username) {
+                usernameDisplay.textContent = decodedToken.username; 
+                usernameDisplay.style.display = 'block'; 
+                logoutButton.style.display = 'block'; 
+            }
+        }
+
+        
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault(); 
+            const usernameInput = document.querySelector('#username');
+            const passwordInput = document.querySelector('#password');
+
+            const response = await fetch('/users/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams({
+                    username: usernameInput.value,
+                    password: passwordInput.value,
+                }),
+            });
+
+            
+            if (response.ok) {
+                const data = await response.json();
+                localStorage.setItem('jwtToken', data.token); 
+
+                
+                const decodedToken = parseJwt(data.token);
+                if (decodedToken && decodedToken.username) {
+                    usernameDisplay.textContent = decodedToken.username; 
+                }
+
+                localStorage.setItem('nomeusuario', decodedToken.username);
+                window.location.href = `/home`;
+            } else {
+                
+                const errorMessage = document.getElementById('error-message');
+                errorMessage.textContent = 'Login falhou! Verifique suas credenciais.';
+            }
+        });
+
+        
+        logoutButton.addEventListener('click', async (e) => {
+            e.preventDefault(); 
+            localStorage.removeItem('jwtToken'); 
+            localStorage.removeItem('nomeusuario'); 
+            usernameDisplay.textContent = 'Nome de Usuário'; 
+            usernameDisplay.style.display = 'none'; 
+            logoutButton.style.display = 'none'; 
+            window.location.href = '/users/login'; 
+        });
+    });
+    </script>
+    <div id="error-message" style="color: red;"></div>
+</body>
+
+</html>

@@ -1,0 +1,316 @@
+body {
+    background-color: #14171a; 
+    color: #ffffff; 
+    font-family: Arial, sans-serif; 
+    display: flex;
+    flex-direction: column;
+    align-items: center; 
+    justify-content: flex-start; 
+    min-height: 100vh;
+    margin: 0;
+}
+
+h1 {
+    color: #1da1f2; 
+    margin-bottom: 10px; 
+}
+
+form {
+    width: 90%; 
+    max-width: 400px; 
+}
+
+button {
+    background-color: #1da1f2; 
+    color: white; 
+    border: none; 
+    padding: 10px 15px; 
+    border-radius: 5px; 
+    cursor: pointer; 
+    width: 100%; 
+    max-width: 400px; 
+    transition: background-color 0.3s;
+}
+
+button:hover {
+    background-color: #0d95e8; 
+}
+
+ul {
+    list-style-type: none; 
+    padding: 0; 
+    width: 100%; 
+    margin: 0; 
+}
+
+.card {
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    margin: 20px; 
+    border: 1px solid #333; 
+    border-radius: 5px; 
+    padding: 20px; 
+    background-color: #1c1f23;
+}
+
+textarea {
+    width: 100%; 
+    max-width: 400px; 
+    margin-bottom: 10px;
+}
+
+.card button {
+    background-color: #007bff; 
+    color: white; 
+    border: none; 
+    border-radius: 5px; 
+    padding: 10px 15px; 
+    cursor: pointer; 
+    transition: background-color 0.3s; 
+}
+
+.card button:hover {
+    background-color: #0056b3; 
+}
+
+.navbar {
+    position: fixed; 
+    top: 0; 
+    left: 0; 
+    width: 200px; 
+    height: 100vh; 
+    background-color: #192734; 
+    padding: 20px; 
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.5); 
+}
+
+.user-info {
+    display: flex; 
+    flex-direction: column; 
+    align-items: center; 
+    margin-bottom: 40px; 
+}
+
+.avatar {
+    width: 50px; 
+    height: 50px; 
+    border-radius: 50%; 
+    margin-bottom: 10px; 
+}
+
+.username {
+    font-weight: bold; 
+    text-align: center; 
+}
+
+.nav-links {
+    list-style-type: none; 
+    padding: 0; 
+}
+
+.nav-links li {
+    margin-bottom: 15px; 
+}
+
+.nav-links a {
+    text-decoration: none; 
+    color: #ffffff; 
+    transition: color 0.3s; 
+}
+
+.nav-links a:hover {
+    color: #1da1f2; 
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7); 
+}
+
+.modal-content {
+    background-color: #1c1f23; 
+    margin: 15% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 300px;
+    border-radius: 10px;
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover, .close:focus {
+    color: white; 
+    cursor: pointer;
+}
+
+.card-post {
+    border: 1px solid #333; 
+    border-radius: 5px; 
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5); 
+    padding: 10px; 
+    margin-bottom: 20px; 
+    width: 100%; 
+    background-color: #1c1f23; 
+    display: flex; 
+    flex-direction: column; 
+
+}
+
+.card-post p {
+    margin: 0; 
+    white-space: normal; 
+    color: #ffffff; 
+    overflow-wrap: break-word; 
+}
+
+.posts-container {
+    display: flex; 
+    flex-direction: column; 
+    margin-top: 20px; 
+    width: 100%; 
+    max-width: 400px; 
+}
+
+.post-header {
+    display: flex; 
+    align-items: center; 
+    margin-bottom: 5px; 
+}
+
+.avatar {
+    width: 50px; 
+    height: 50px; 
+    border-radius: 50%; 
+    margin-right: 10px; 
+}
+
+.username {
+    font-style: italic; 
+    font-weight: bold;
+    margin-top: 5px; 
+    color: #ffffff; 
+}
+
+/* Estilo dos botões de curtir e comentar */
+.post-actions {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 10px;
+}
+
+.post-actions button {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 20px;
+    color: #1da1f2;
+    padding: 5px 10px;
+    transition: color 0.3s;
+}
+
+.post-actions button:hover {
+    color: #0d95e8;
+}
+
+/* Ícone de coração inicial com contorno */
+.like-button i {
+    color: #e0245e;
+}
+
+/* Ícone de coração preenchido ao curtir */
+.like-button.liked i {
+    color: #ff5a5f;
+    font-weight: bold;
+}
+
+/* Card de comentários */
+.comment-card {
+    position: absolute; /* Mude de fixed para absolute */
+    top: 0;
+    right: -340px; /* Fora da tela inicialmente */
+    width: 300px;
+    height: 100vh;
+    background-color: #1c2938; /* Cor de fundo semelhante ao tema escuro */
+    color: white;
+    padding: 20px;
+    box-shadow: -2px 0 5px rgba(0, 0, 0, 0.3);
+    transition: transform 0.4s ease-in-out;
+    transform: translateX(-100%);
+}
+
+/* Quando o card estiver visível, ele deve se mover para a esquerda */
+.comment-card.active {
+    transform: translateX(100%); /* Mantenha assim para mover para a esquerda */
+}
+
+.comments-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.comments-header button {
+    background-color: #f00;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+}
+
+.comments-content {
+    margin-top: 20px;
+}
+
+#comments-list {
+    list-style: none;
+    padding: 0;
+}
+
+.like-section {
+    display: flex;
+    align-items: center;
+  }
+  
+  .like-icon {
+    font-size: 24px; /* Tamanho do ícone de coração */
+    cursor: pointer;
+    margin-right: 5px;
+  }
+  
+  .like-count {
+    font-size: 18px; /* Tamanho do contador */
+    color: #333; /* Cor do contador */
+  }
+
+  .comment-bubble {
+    background-color: #3e4e69;
+    color: white;
+    padding: 10px;
+    border-radius: 10px;
+    margin: 5px 0;
+    max-width: 80%;
+    position: relative;
+}
+
+.comment-bubble::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 100%;
+    margin-top: -5px;
+    border-width: 5px;
+    border-style: solid;
+    border-color: transparent transparent transparent #3e4e69;
+}

@@ -1,0 +1,54 @@
+body {
+    background-color: #121212; /* Cor de fundo escura */
+    color: #ffffff; /* Cor do texto */
+    font-family: Arial, sans-serif; 
+    display: flex; /* Usar flexbox para centralizar */
+    align-items: center; /* Centraliza verticalmente */
+    justify-content: center; /* Centraliza horizontalmente */
+    min-height: 100vh; /* Preenche a altura total da tela */
+    margin: 0; /* Remove margens padrão */
+}
+
+.card {
+    background-color: #1c1f23; /* Fundo do card */
+    border: 1px solid #333; /* Borda do card */
+    border-radius: 10px; /* Bordas arredondadas */
+    padding: 30px; /* Aumenta o espaçamento interno do card */
+    width: 100%; /* Largura do card */
+    max-width: 400px; /* Largura máxima do card */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5); /* Sombra do card */
+    text-align: center; /* Centraliza o texto dentro do card */
+}
+
+h1 {
+    margin-bottom: 20px; /* Espaçamento abaixo do título */
+    padding-right: 5%;
+}
+
+input {
+    width: 100%; /* Largura do input */
+    max-width: 300px; /* Largura máxima do input */
+    padding: 10px; /* Espaçamento interno */
+    margin-top: 15px; /* Aumenta o espaçamento acima do input */
+    margin-bottom: 15px; /* Aumenta o espaçamento abaixo do input */
+    border: 1px solid #555; /* Borda do input */
+    border-radius: 5px; /* Bordas arredondadas */
+    background-color: #2c2f33; /* Fundo do input */
+    color: #ffffff; /* Cor do texto do input */
+}
+
+button {
+    background-color: #1da1f2; /* Cor do botão */
+    color: white; /* Cor do texto do botão */
+    border: none; /* Remove borda padrão */
+    padding: 10px 20px; /* Ajusta o espaçamento interno do botão */
+    border-radius: 5px; /* Bordas arredondadas */
+    cursor: pointer; /* Muda o cursor para indicar que é clicável */
+    width: auto; /* Ajusta a largura do botão para o conteúdo */
+    margin-top: 10px; /* Espaçamento acima do botão */
+    transition: background-color 0.3s; /* Transição suave para a cor de fundo */
+}
+
+button:hover {
+    background-color: #0d95e8; /* Cor do botão ao passar o mouse */
+}
